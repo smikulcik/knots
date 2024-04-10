@@ -10,55 +10,136 @@
     }
   </style>
   <script>
+    function angMagFrom(a, angle, magnitude) {
+      return {
+        x: a.x + magnitude*Math.cos(angle*Math.PI/180.0),
+        y: a.y + magnitude*Math.sin(angle*Math.PI/180.0),
+      }
+    }
     const knot = [
       {
-        x: 50,
-        y: 150,
-      },
-      {
         x: 200,
-        y: 150,
+        y: 100,
+        a: {
+          a: -20, // angle in degrees
+          m1: 50, // outbound magnitude
+          m2: -100, // inbound magnitude 
+          n: {i: 1,x: 'a'}
+        },
+        b: {
+          a: 270, // angle in degrees
+          m1: 75, // outbound magnitude
+          m2: -50, // inbound magnitude 
+          n: {i: 1,x: 'b'}
+        },
+        top: 'a'
       },
       {
-        x: 150,
+        x: 400,
+        y: 100,
+        a: {
+          a: 20, // angle in degrees
+          m1: 100, // outbound magnitude
+          m2: -50, // inbound magnitude 
+          n: {i: 2,x: 'a'}
+        },
+        b: {
+          a: 90, // angle in degrees
+          m1: 50, // outbound magnitude
+          m2: -75, // inbound magnitude 
+          n: {i: 2,x: 'b'}
+        },
+        top: 'b'
+      },
+      {
+        x: 300,
         y: 250,
-      },
-      {
-        x: 50,
-        y: 80,
-      },
-      {
-        x: 200,
-        y: 80,
-      },
-      {
-        x: 100,
-        y: 250,
-      },
+        a: {
+          a: 210, // angle in degrees
+          m1: 50, // outbound magnitude
+          m2: -100, // inbound magnitude 
+          n: {i: 0,x: 'b'}
+        },
+        b: {
+          a: 150, // angle in degrees
+          m1: 100, // outbound magnitude
+          m2: -50, // inbound magnitude 
+          n: {i: 0,x: 'a'}
+        },
+        top: 'a'
+      }
     ]
     window.onload = function () {
-      var canvas = document.getElementById("canvas");
-      var context = canvas.getContext("2d");
-      for(var s=0;s<knot.length;s++){
-        const start = knot[s]
-        const mid = knot[(s+1)%knot.length]
-        const end = knot[(s+2)%knot.length]
-        const cstart = {
-          x: (start.x + mid.x)/2,
-          y: (start.y + mid.y)/2,
-        }
-        const cend = {
-          x: (mid.x + end.x)/2,
-          y: (mid.y + end.y)/2,
-        }
-        // console.log('line', start, control, end)
-        context.moveTo(cstart.x, cstart.y);
-        context.lineWidth = 10;
-        // context.lineTo(end.x, end.y)
-        context.bezierCurveTo(mid.x, mid.y, mid.x, mid.y, cend.x, cend.y);
-        context.stroke();
+      var canvas = document.getElementById("canvas")
+      var context = canvas.getContext("2d")
+
+      context.fillStyle = "#eeeeee"
+      context.strokeStyle = '#000000'
+      context.rect(0, 0, 800, 600)
+      context.fill()
+
+      let cur = {
+        i: 0,
+        x: 'a'
       }
-    };
+      let lineWidth=20
+      do {
+      
+        // start and end
+        const start = knot[cur.i]
+        const nxt = start[cur.x].n
+        const end = knot[nxt.i]
+
+        // shift start/end to be starting after the crossover ends
+        const s = angMagFrom(start, start[cur.x].a, lineWidth)
+        const e = angMagFrom(end, end[nxt.x].a, -1*lineWidth)
+
+        // control points from angle
+        const c1 = angMagFrom(s, start[cur.x].a, start[cur.x].m1)
+        const c2 = angMagFrom(e, end[nxt.x].a, end[nxt.x].m2)
+
+        context.beginPath()
+        context.moveTo(s.x, s.y)
+        context.lineWidth = lineWidth
+        context.strokeStyle = '#000000'
+        context.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, e.x, e.y)
+        context.stroke()
+
+        context.beginPath()
+        context.moveTo(s.x, s.y)
+        context.lineWidth = lineWidth - 3
+        context.strokeStyle = '#ffffff'
+        context.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, e.x, e.y)
+        context.stroke()
+
+        cur = knot[cur.i][cur.x].n
+      } while (cur.i !== 0 || cur.x !== 'a') // continue until we get to the start
+
+      // draw cross overs on top
+      for(const crossover of knot){
+        const bottom = crossover.top === 'a' ? 'b' : 'a'
+        for(const x of [bottom, crossover.top]){
+          const start = angMagFrom(crossover, crossover[x].a, -1*(lineWidth+1)) // give an extra pixel to the top layer
+          const end = angMagFrom(crossover, crossover[x].a, (lineWidth+1))
+          const borderStart = angMagFrom(crossover, crossover[x].a, -1*(lineWidth))
+          const borderEnd = angMagFrom(crossover, crossover[x].a, (lineWidth))
+
+          context.beginPath()
+          context.moveTo(borderStart.x, borderStart.y)
+          context.lineWidth = lineWidth
+          context.strokeStyle = '#000000'
+          context.lineTo(borderEnd.x, borderEnd.y)
+          context.stroke()
+
+          context.beginPath()
+          context.moveTo(start.x, start.y)
+          context.lineWidth = lineWidth - 3
+          context.strokeStyle = '#ffffff'
+          context.lineTo(end.x, end.y)
+          context.stroke()
+        }
+      }
+    }
   </script>
   </head>
   <body>
