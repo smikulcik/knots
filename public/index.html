@@ -1,0 +1,67 @@
+<html>
+  <head>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+    #myCanvas {
+      border: 1px solid #9C98ff;
+    }
+  </style>
+  <script>
+    const knot = [
+      {
+        x: 50,
+        y: 150,
+      },
+      {
+        x: 200,
+        y: 150,
+      },
+      {
+        x: 150,
+        y: 250,
+      },
+      {
+        x: 50,
+        y: 80,
+      },
+      {
+        x: 200,
+        y: 80,
+      },
+      {
+        x: 100,
+        y: 250,
+      },
+    ]
+    window.onload = function () {
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext("2d");
+      for(var s=0;s<knot.length;s++){
+        const start = knot[s]
+        const mid = knot[(s+1)%knot.length]
+        const end = knot[(s+2)%knot.length]
+        const cstart = {
+          x: (start.x + mid.x)/2,
+          y: (start.y + mid.y)/2,
+        }
+        const cend = {
+          x: (mid.x + end.x)/2,
+          y: (mid.y + end.y)/2,
+        }
+        // console.log('line', start, control, end)
+        context.moveTo(cstart.x, cstart.y);
+        context.lineWidth = 10;
+        // context.lineTo(end.x, end.y)
+        context.bezierCurveTo(mid.x, mid.y, mid.x, mid.y, cend.x, cend.y);
+        context.stroke();
+      }
+    };
+  </script>
+  </head>
+  <body>
+  <canvas id="canvas" width="800" height="600"></canvas>
+  </body>
+</html>
