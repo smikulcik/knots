@@ -10,6 +10,53 @@
     }
   </style>
   <script>
+    class Mat {
+      constructor(rows, cols, data){
+        this.rows = rows
+        this.cols = cols
+        this.data = data
+      }
+    }
+    function dot(a, b){
+      return a.x*b.x + a.y*b.y
+    }
+    function normalize(v){
+      const mag = Math.sqrt(v.x*v.x + v.y*v.y)
+      return {
+        x: v.x/mag,
+        y: v.y/mag
+      }
+    }
+    function matMul(a, b){
+      const out = new Array(a.rows * b.cols)
+
+      for(let aRow = 0;aRow<a.rows;aRow++){
+        for(let bCol = 0; bCol<b.cols; bCol++){
+          out[aRow*a.cols+bCol] = 0
+          for(let i=0;i<a.cols;i++){
+            out[aRow*a.cols+bCol] += a.data[aRow*a.cols+i]*b.data[i*b.cols+bCol]
+          }
+        }
+      }
+      return new Mat(a.rows, b.cols, out)
+    }
+    function project(p, v){
+      v = normalize(v)
+      const mag = dot(p, v)
+      return {
+        x: v.x*mag,
+        y: v.y*mag
+      }
+    }
+    // console.log('proj', project({x: 3, y: 4}, {x: 3, y: 4}))
+    // const x = new Mat(2,2, 
+    //   [1,2,
+    //    3,4])
+    // const y = new Mat(2,2,
+    //   [5,6,
+    //    7,8])
+    // console.log('x', x, y, matMul(x, y))
+
     function angMagFrom(a, angle, magnitude) {
       return {
         x: a.x + magnitude*Math.cos(angle*Math.PI/180.0),
