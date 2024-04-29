@@ -17,8 +17,15 @@
         this.data = data
       }
     }
-    function dot(a, b){
-      return a.x*b.x + a.y*b.y
+    function vdot(a, b){
+      return a.x*b.x + a.y*b.y + (a.z*b.z || 0)
+    }
+    function vcross(a, b){
+      return {
+        x: (a.y*b.z) - (a.z*b.y),
+        y: (a.z*b.x) - (a.x*b.z),
+        z: (a.x*b.y) - (a.y*b.x)
+      }
     }
     function normalize(v){
       const mag = Math.sqrt(v.x*v.x + v.y*v.y)
@@ -40,15 +47,54 @@
       }
       return new Mat(a.rows, b.cols, out)
     }
-    function project(p, v){
-      v = normalize(v)
-      const mag = dot(p, v)
+    function vsub(a, b){
       return {
-        x: v.x*mag,
-        y: v.y*mag
+        x: a.x - b.x,
+        y: a.y - b.y,
+        z: a.z ? a.z - b.z : 0
       }
     }
-    // console.log('proj', project({x: 3, y: 4}, {x: 3, y: 4}))
+    function vadd(a, b){
+      return {
+        x: a.x + b.x,
+        y: a.y + b.y,
+        z: a.z ? a.z + b.z : 0
+      }
+    }
+    function vscalar(s, a){
+      return {
+        x: a.x*s,
+        y: a.y*s,
+        z: a.z ? a.z*s : 0
+      }
+    }
+    function vmag(v){
+      return Math.sqrt(v.x*v.x + v.y*v.y + (v.z*v.z || 0))
+    }
+    // compute tangent vector from p1 in relation to line
+    // p0->p1->p2
+    function vtangent(p0, p1, p2){
+      const ab = vsub(p1, p0)
+      const cb = vsub(p1, p2)
+
+      // find bisect vector
+      const bisect = vadd(normalize(ab), normalize(cb))
+
+      // find cross-product vector
+      const cross = vcross(ab, cb)
+
+      // tangent is cross-product cross bisect
+      return vcross(bisect, cross)
+    }
+    function project(p, v0, v){
+      const pMag = vdot(vsub(p, v0), v)/vmag(v)
+      const vHat = normalize(v)
+      return {
+        x: v0.x + vHat.x*pMag,
+        y: v0.y + vHat.y*pMag
+      }
+    }
+    console.log('proj', project({x: 1, y: 2}, {x: 1, y: 0}, {x: 2, y: 2}))
     // const x = new Mat(2,2, 
     //   [1,2,
     //    3,4])
@@ -144,6 +190,22 @@
       context.strokeStyle = '#000000'
       context.rect(0, 0, 800, 600)
       context.fill()
+
+      // try out the projection stuff
+      circle(context, knot[0], 3, '#ff0000')
+      circle(context, knot[1], 3, '#ff0000')
+      circle(context, knot[2], 3, '#ff0000')
+      // const s = vsub(knot[2], knot[1])
+      // line(context, knot[2], knot[1], 1, '#afa000')
+      // const prj = project(knot[0], knot[2], s)
+      // line(context, knot[0], prj, 1, '#afa000')
+      // circle(context, prj, 3, '#ff0000')
+
+      const tangent = vtangent(knot[0], knot[1], knot[2])
+      const prj = project(knot[0], knot[1], tangent)
+      circle(context, prj, 3, '#ff0000')
+
+      // return
 
       let cur = {
         i: 0,
