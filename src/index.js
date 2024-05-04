@@ -1,5 +1,5 @@
 import { CircleObject, Scene } from "./2d";
-import { figure8, trefoil } from "./common_knots";
+import { figure8, k3_1, trefoil } from "./common_knots";
 import "./index.css"
 import { Knot, draw } from "./knot_2d";
 
@@ -18,8 +18,8 @@ window.onload = () => {
 
   const scene = new Scene(canvas)
 
-  scene.addObject(new Knot(trefoil, 30))
-  scene.addObject(new Knot(figure8, 20))
+  scene.addObject(new Knot(k3_1, 30))
+  // scene.addObject(new Knot(figure8, 20))
 
   // initial draw
   scene.draw()

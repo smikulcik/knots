@@ -23,6 +23,15 @@ export function bezier(context, points, lineWidth, color) {
   context.stroke()
 }
 
+export function getCursor(e) {
+  const r = e.toElement.getBoundingClientRect()
+  return {
+    x: e.clientX - r.left,
+    y: e.clientY - r.top
+  }
+}
+
+
 export class CircleObject {
   constructor(x, y, color, radius){
     this.x = x
@@ -45,8 +54,10 @@ export class Scene {
 
     // handle mouse movements
     canvas.onmousemove = (e)=>{
-      this.cursor.x = e.clientX
-      this.cursor.y = e.clientY
+      const c = getCursor(e)
+      this.cursor.x = c.x
+      this.cursor.y = c.y
+
 
       // handle objects
       // TODO: Optimize for the objects that apply

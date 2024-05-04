@@ -1,7 +1,7 @@
-import { CircleObject, bezier, circle, line } from "./2d"
+import { CircleObject, bezier, circle, getCursor, line } from "./2d"
 import { splitQuadBezier } from "./bezier"
 import { figure8, trefoil, unknot } from "./common_knots"
-import { angMagFrom, distance } from "./vector"
+import { angMagFrom, distance, normalize, vadd, vscalar, vsub } from "./vector"
 
 export class Knot {
   constructor(knot, lineWidth){
@@ -19,10 +19,20 @@ export class Knot {
     this.selected = false
   }
   onmousemove(e){
+    const cursor = getCursor(e)
+
     // move selected things around
     if (this.selected && this.selectablePoint){
-      this.knot[this.selectablePoint.i].x = this.selectablePoint.p.x
-      this.knot[this.selectablePoint.i].y = this.selectablePoint.p.y
+      this.selectablePoint.p.x = cursor.x
+      this.selectablePoint.p.y = cursor.y
+
+      // lock other side in rotation
+      const center = this.knot[this.selectablePoint.i]
+      const other = this.knot[this.selectablePoint.i][this.selectablePoint.x][this.selectablePoint.c === "c1" ? "c2" : "c1"]
+      const otherDist = distance(other, center)
+      const newOther = vadd(center, vscalar(-1 * otherDist, normalize(vsub(this.selectablePoint.p, center))))
+      other.x = newOther.x
+      other.y = newOther.y
     }
 
     // get the current selectable points
@@ -31,14 +41,14 @@ export class Knot {
     const controlPoints = []
     for(const i in this.knot){
       const crossover = this.knot[i]
-      controlPoints.push({p: angMagFrom(crossover, crossover.a.a, crossover.a.m1),i,x: 'a',m: 'm1'})
-      controlPoints.push({p: angMagFrom(crossover, crossover.a.a, crossover.a.m2),i,x: 'a',m: 'm2'})
-      controlPoints.push({p: angMagFrom(crossover, crossover.b.a, crossover.b.m1),i,x: 'b',m: 'm1'})
-      controlPoints.push({p: angMagFrom(crossover, crossover.b.a, crossover.b.m2),i,x: 'b',m: 'm2'})
+      controlPoints.push({p: crossover.a.c1,i,x: 'a', c: 'c1'})
+      controlPoints.push({p: crossover.a.c2,i,x: 'a', c: 'c2'})
+      controlPoints.push({p: crossover.b.c1,i,x: 'b', c: 'c1'})
+      controlPoints.push({p: crossover.b.c2,i,x: 'b', c: 'c2'})
     }
     let shortestDistance
     controlPoints.forEach(cp=>{
-      const distanceToSelected = distance(cp.p, {x: e.clientX, y: e.clientY})
+      const distanceToSelected = distance(cp.p, cursor)
       if (distanceToSelected < 30){
         if (shortestDistance === undefined || distanceToSelected < shortestDistance){
           this.selectablePoint = cp
@@ -64,8 +74,8 @@ export class Knot {
         const end = knot[nxt.i]
 
         // control points from angle
-        const c1 = angMagFrom(start, start[cur.x].a, start[cur.x].m1)
-        const c2 = angMagFrom(end, end[nxt.x].a, end[nxt.x].m2)
+        const c1 = start[cur.x].c1
+        const c2 = end[nxt.x].c2
 
         // draw curve
         const [left, right] = splitQuadBezier([start, c1, c2, end], .5)
@@ -90,10 +100,10 @@ export class Knot {
     }
     // draw control points
     for(const crossover of knot){
-      const a1 = angMagFrom(crossover, crossover.a.a, crossover.a.m1)
-      const a2 = angMagFrom(crossover, crossover.a.a, crossover.a.m2)
-      const b1 = angMagFrom(crossover, crossover.b.a, crossover.b.m1)
-      const b2 = angMagFrom(crossover, crossover.b.a, crossover.b.m2)
+      const a1 = crossover.a.c1
+      const a2 = crossover.a.c2
+      const b1 = crossover.b.c1
+      const b2 = crossover.b.c2
 
       // draw control point lines
       line(context, crossover, a1, 1, '#008800')
