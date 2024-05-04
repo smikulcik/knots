@@ -175,7 +175,7 @@
     }
 
     // knot data
-    const knot = [
+    const trefoil = [
       {
         x: 250,
         y: 230,
@@ -228,6 +228,94 @@
         top: 'a'
       }
     ]
+    const unknot = [ // this doesn't render well. it comes out as just a line
+      {
+        x: 200,
+        y: 200,
+        a: {
+          a: 0,
+          m1: 50,
+          m2: 50,
+          n: {i: 0, x: 'a'}
+        }
+      }
+    ]
+    const figure8 = [
+      {
+        x: 100,
+        y: 100,
+        a: {
+          a: -45,
+          m1: 20,
+          m2: -100,
+          n: {i: 1, x: 'a'}
+        },
+        b: {
+          a: 225,
+          m1: 100,
+          m2: -20,
+          n: {i: 2, x: 'b'}
+        },
+        top: 'a'
+      },
+      {
+        x: 150,
+        y: 100,
+        a: {
+          a: 45,
+          m1: 10,
+          m2: -20,
+          n: {i: 3, x: 'a'}
+        },
+        b: {
+          a: 135,
+          m1: 20,
+          m2: -20,
+          n: {i: 0, x: 'b'}
+        },
+        top: 'b'
+      },
+      {
+        x: 200,
+        y: 75,
+        a: {
+          a: 175,
+          m1: 20,
+          m2: -50,
+          n: {i: 1, x: 'b'}
+        },
+        b: {
+          a: 80,
+          m1: 10,
+          m2: -70,
+          n: {i: 3, x: 'b'}
+        },
+        top: 'b'
+      },
+      {
+        x: 200,
+        y: 125,
+        a: {
+          a: 5,
+          m1: 60,
+          m2: -10,
+          n: {i: 2, x: 'a'}
+        },
+        b: {
+          a: 100,
+          m1: 70,
+          m2: -10,
+          n: {i: 0, x: 'a'}
+        },
+        top: 'a'
+      }
+    ]
+    
+
+    const knot = trefoil
+    // const knot = unknot 
+    // const knot = figure8 
+
     window.onload = function () {
       var canvas = document.getElementById("canvas")
       var context = canvas.getContext("2d")
@@ -243,6 +331,7 @@
           x: 'a'
         }
         let lineWidth=20
+        let ttl = 8
         do {
           // start and end
           const start = knot[cur.i]
@@ -271,28 +360,29 @@
           }
 
           cur = knot[cur.i][cur.x].n
-        } while (cur.i !== 0 || cur.x !== 'a') // continue until we get to the start
+          ttl--
+        } while ((cur.i !== 0 || cur.x !== 'a') && ttl > 0) // continue until we get to the start
       }
       // draw control points
-      for(const crossover of knot){
-        const a1 = angMagFrom(crossover, crossover.a.a, crossover.a.m1)
-        const a2 = angMagFrom(crossover, crossover.a.a, crossover.a.m2)
-        const b1 = angMagFrom(crossover, crossover.b.a, crossover.b.m1)
-        const b2 = angMagFrom(crossover, crossover.b.a, crossover.b.m2)
+      // for(const crossover of knot){
+      //   const a1 = angMagFrom(crossover, crossover.a.a, crossover.a.m1)
+      //   const a2 = angMagFrom(crossover, crossover.a.a, crossover.a.m2)
+      //   const b1 = angMagFrom(crossover, crossover.b.a, crossover.b.m1)
+      //   const b2 = angMagFrom(crossover, crossover.b.a, crossover.b.m2)
 
-        // draw control point lines
-        line(context, crossover, a1, 1, '#008800')
-        circle(context, a1, 3, '#008800')
+      //   // draw control point lines
+      //   line(context, crossover, a1, 1, '#008800')
+      //   circle(context, a1, 3, '#008800')
 
-        line(context, crossover, a2, 1, '#008800')
-        circle(context, a2, 3, '#008800')
+      //   line(context, crossover, a2, 1, '#008800')
+      //   circle(context, a2, 3, '#008800')
 
-        line(context, crossover, b1, 1, '#008800')
-        circle(context, b1, 3, '#008800')
+      //   line(context, crossover, b1, 1, '#008800')
+      //   circle(context, b1, 3, '#008800')
 
-        line(context, crossover, b2, 1, '#008800')
-        circle(context, b2, 3, '#008800')
-      }
+      //   line(context, crossover, b2, 1, '#008800')
+      //   circle(context, b2, 3, '#008800')
+      // }
     }
   </script>
   </head>
