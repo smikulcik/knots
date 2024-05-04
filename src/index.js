@@ -1,5 +1,7 @@
+import { CircleObject, Scene } from "./2d";
+import { figure8, trefoil } from "./common_knots";
 import "./index.css"
-import { draw } from "./knot_2d";
+import { Knot, draw } from "./knot_2d";
 
 function component() {
   const element = document.createElement('canvas')
@@ -12,5 +14,13 @@ function component() {
 document.body.appendChild(component());
 
 window.onload = () => {
-  draw(document.getElementById("content"))
+  const canvas = document.getElementById("content")
+
+  const scene = new Scene(canvas)
+
+  scene.addObject(new Knot(trefoil, 30))
+  scene.addObject(new Knot(figure8, 20))
+
+  // initial draw
+  scene.draw()
 }

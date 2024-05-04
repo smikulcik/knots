@@ -99,3 +99,11 @@ export function angMagFrom(a, angle, magnitude) {
     y: a.y + magnitude * Math.sin(angle * Math.PI / 180.0),
   }
 }
+
+export function distance(a, b){
+  return Math.sqrt(
+    (b.x - a.x)*(b.x - a.x)+
+    (b.y - a.y)*(b.y - a.y)+
+    ((b.z || 0) - (a.z || 0))*((b.z || 0) - (a.z || 0))
+  )
+}
