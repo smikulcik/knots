@@ -10,9 +10,9 @@ export function circle(context, c, radius, color) {
   // context.stroke();
 }
 export function line(context, s, e, lineWidth, color) {
-  return bezier(context, [s, s, e, e], lineWidth, color)
+  return drawBezier(context, [s, s, e, e], lineWidth, color)
 }
-export function bezier(context, points, lineWidth, color) {
+export function drawBezier(context, points, lineWidth, color) {
   const [s, c1, c2, e] = points
 
   context.beginPath()
