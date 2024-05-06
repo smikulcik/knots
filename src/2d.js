@@ -24,11 +24,21 @@ export function drawBezier(context, points, lineWidth, color) {
 }
 
 export function getCursor(e) {
-  const r = e.toElement.getBoundingClientRect()
-  return {
-    x: e.clientX - r.left,
-    y: e.clientY - r.top
+  // console.log('e', e)
+  let r
+  if (e instanceof TouchEvent){
+    return {
+      x: e.changedTouches?.[0].pageX,
+      y: e.changedTouches?.[0].pageY,
+    }
+  } else if (e instanceof MouseEvent){
+    r = e.toElement.getBoundingClientRect()
+    return {
+      x: e.clientX - r.left,
+      y: e.clientY - r.top
+    }
   }
+  throw new Error("Unknown event type", e)
 }
 
 
@@ -84,6 +94,11 @@ export class Scene {
       })
       this.draw()
     }
+
+    // touch events map to mouse events
+    canvas.addEventListener("touchstart", canvas.onmousedown)
+    canvas.addEventListener("touchend", canvas.onmouseup)
+    canvas.addEventListener("touchmove", canvas.onmousemove)
   }
 
   draw(){
