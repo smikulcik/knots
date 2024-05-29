@@ -6,12 +6,12 @@ import { Knot, draw } from "./knot_2d.js";
 function component() {
   const element = document.createElement('canvas')
   element.setAttribute("id", "content")
-  element.setAttribute("width", "800")
-  element.setAttribute("height", "600")
-
+  element.width = window.innerWidth;
+  element.height = window.innerHeight;
   return element
 }
 document.body.appendChild(component());
+document.body.setAttribute("style", "margin: 0; overflow: hidden")
 
 window.onload = () => {
   const canvas = document.getElementById("content")

@@ -106,7 +106,7 @@ export class Scene {
 
     context.fillStyle = "#eeeeee"
     context.strokeStyle = '#000000'
-    context.rect(0, 0, 800, 600)
+    context.rect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight)
     context.fill()
 
     for(const obj of this.objects){
