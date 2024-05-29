@@ -13,6 +13,7 @@ export class Knot {
 
     this.curvePinchPoint
     this.curvePinchPointSelected = false
+    this.curvePinchToCursor
   }
   onmousedown(e){
     if (this.selectableControlPoint !== undefined){
@@ -32,6 +33,9 @@ export class Knot {
     if (!this.curvePinchPointSelected){
       // compute closest point
       this.curvePinchPoint = getCurvePinchPoint(this.knot, cursor)
+      if (this.curvePinchPoint){   
+        this.curvePinchToCursor = vsub(cursor, this.curvePinchPoint.pt)
+      }
     }
 
     // move selected things around
@@ -39,8 +43,8 @@ export class Knot {
       // move pinched point to cursor.x by changing c1 and c2
       // for this segment
       const t0 = this.curvePinchPoint.t
-      this.curvePinchPoint.pt.x = cursor.x
-      this.curvePinchPoint.pt.y = cursor.y
+      this.curvePinchPoint.pt.x = cursor.x - this.curvePinchToCursor.x
+      this.curvePinchPoint.pt.y = cursor.y - this.curvePinchToCursor.y
       const c = this.curvePinchPoint.segment
       const [c1x, c2x] = rref2x3(
         3*Math.pow(1-t0, 2)*t0, 3*(1-t0)*t0*t0, this.curvePinchPoint.pt.x - c[0].x*Math.pow(1-t0, 3) - c[3].x*Math.pow(t0, 3),
