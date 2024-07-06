@@ -18,10 +18,11 @@ export function vcross(a, b) {
   }
 }
 export function normalize(v) {
-  const mag = Math.sqrt(v.x * v.x + v.y * v.y)
+  const mag = vmag(v)
   return {
     x: v.x / mag,
-    y: v.y / mag
+    y: v.y / mag,
+    z: (v.z || 0) / mag
   }
 }
 export function matMul(a, b) {
@@ -60,6 +61,18 @@ export function vscalar(s, a) {
 }
 export function vmag(v) {
   return Math.sqrt(v.x * v.x + v.y * v.y + (v.z * v.z || 0))
+}
+export function veq(a, b){
+  if(a.x !== b.x){
+    return false
+  }
+  if (a.y !== b.y){
+    return false
+  }
+  if ((a.z || 0) !== (b.z || 0 )){
+    return false
+  }
+  return true
 }
 // compute tangent vector from p1 in relation to line
 // p0->p1->p2
