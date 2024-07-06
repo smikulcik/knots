@@ -1,4 +1,4 @@
-import { CircleObject, Scene } from "./2d.js";
+import { Scene } from "./scene.js";
 import { figure8, k3_1, k4_1, trefoil } from "./common_knots.js";
 import "./index.css"
 import { Knot, draw } from "./knot_2d.js";
