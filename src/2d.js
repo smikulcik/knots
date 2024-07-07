@@ -17,6 +17,7 @@ export function drawBezier(context, points, lineWidth, color) {
 
   context.beginPath()
   context.moveTo(s.x, s.y)
+  context.lineCap = "round"
   context.lineWidth = lineWidth
   context.strokeStyle = color
   context.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, e.x, e.y)
