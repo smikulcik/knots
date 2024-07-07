@@ -35,7 +35,14 @@ export class Scene {
 
         if (this.mode === MODE_DRAWING){
             if(this.selectedObject){
-                this.selectedObject.onmousemove(e)
+                if (typeof this.selectedObject.onmousemove === 'function'){
+                    const start = new Date()
+                    this.selectedObject.onmousemove(e)
+                    const end = new Date()
+                    if (end - start > 3){
+                        console.log('onmousemove', this.selectedObject.constructor.name, end - start)
+                    }
+                }
             }
         }
         if (this.mode === MODE_EDITING){
@@ -45,7 +52,7 @@ export class Scene {
             if (typeof obj.onmousemove === 'function'){
                 obj.onmousemove(e)
             }
-            })
+        })
         }
         this.draw()
       }
@@ -82,7 +89,9 @@ export class Scene {
       window.onkeyup = (e)=>{
         if (this.mode === MODE_DRAWING){
             if(this.selectedObject){
-                this.selectedObject.onkeyup(e)
+                if (typeof this.selectedObject.onkeyup === 'function'){
+                    this.selectedObject.onkeyup(e)
+                }
             }
         }
 
@@ -90,6 +99,24 @@ export class Scene {
             this.objects.forEach(obj=>{
             if (typeof obj.onkeyup === 'function'){
                 obj.onkeyup(e)
+            }
+            })
+        }
+        this.draw()
+      }
+      window.onkeydown = (e)=>{
+        if (this.mode === MODE_DRAWING){
+            if(this.selectedObject){
+                if (typeof this.selectedObject.onkeydown === 'function'){
+                    this.selectedObject.onkeydown(e)
+                }
+            }
+        }
+
+        if (this.mode === MODE_EDITING){
+            this.objects.forEach(obj=>{
+            if (typeof obj.onkeydown === 'function'){
+                obj.onkeydown(e)
             }
             })
         }
@@ -112,7 +139,12 @@ export class Scene {
       context.fill()
   
       for(const obj of this.objects){
+        const start = new Date()
         obj.draw(context)
+        const end = new Date()
+        if (end - start > 3){
+            console.log('draw', obj.constructor.name, end - start)
+        }
       }
   
       // draw cursor over everything

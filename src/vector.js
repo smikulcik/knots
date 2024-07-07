@@ -193,3 +193,31 @@ export function pointInPolygon(pt, path){
   // if counter is odd - point is inside, even - point is outside
   return counter % 2 == 1
 }
+
+function closestPointOnSegment(start, end, pt){
+  const closestPt = project(pt, start, vsub(end, start))
+  
+  // check bounds
+  let t = (closestPt.x - start.x)/vsub(end, start).x
+  if (isNaN(t)){ // if v.x is 0, can't divide
+      t = (closestPt.y - start.y)/vsub(end, start).y
+  }
+
+  if (t > 1) return end
+  if (t < 0) return start
+
+  return closestPt
+}
+export function closestPointOnPath(path, pt){
+  let closestPt
+  let minDist
+  for(let p=0;p<path.length;p++){
+      const cp = closestPointOnSegment(path[p], path[(p+1) % path.length], pt)
+      const d = distance(cp, pt)
+      if (minDist === undefined || d < minDist){
+          closestPt = cp
+          minDist = d
+      }
+  }
+  return closestPt
+}

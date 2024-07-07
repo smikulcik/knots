@@ -1,34 +1,6 @@
 import { circle, getCursor, line } from "./2d.js"
-import { distance, lineSegmentIntersection, pointInPolygon, project, veq, vsub } from "./vector.js"
+import { closestPointOnPath, distance, lineSegmentIntersection, pointInPolygon, project, veq, vsub } from "./vector.js"
 
-
-function closestPointOnSegment(start, end, pt){
-    const closestPt = project(pt, start, vsub(end, start))
-    
-    // check bounds
-    let t = (closestPt.x - start.x)/vsub(end, start).x
-    if (isNaN(t)){ // if v.x is 0, can't divide
-        t = (closestPt.y - start.y)/vsub(end, start).y
-    }
-
-    if (t > 1) return end
-    if (t < 0) return start
-
-    return closestPt
-}
-function closestPointOnPath(path, pt){
-    let closestPt
-    let minDist
-    for(let p=0;p<path.length;p++){
-        const cp = closestPointOnSegment(path[p], path[(p+1) % path.length], pt)
-        const d = distance(cp, pt)
-        if (minDist === undefined || d < minDist){
-            closestPt = cp
-            minDist = d
-        }
-    }
-    return closestPt
-}
 
 export class CrossoverTile {
     constructor(edge){
@@ -48,6 +20,7 @@ export class CrossoverTile {
         // coordinate of cursor in canvas  
         this.cursor
         this.cursorDown = false
+        this.curHeight // 1 for top, 0 for bottom, undefined for alternating
     }
 
     draw(context){
@@ -144,10 +117,10 @@ export class CrossoverTile {
                             x: intersection.x,
                             y: intersection.y,
                             bottom: {s,v: i},
-                            top: {s: this.strands.length-1,v: j},
+                            top: {s: this.strands.length-1,v: j}, // tip of this line goes on top
                         }
-                        // use alternating pattern
-                        if ((this.crossovers.length)%2 === 0){
+                        // if curHeight is bottom, swap top and bottom to go under
+                        if ((this.curHeight === undefined && this.crossovers.length %2 === 0) || this.curHeight === 0){
                             const tmp = newCrossover.top
                             newCrossover.top = newCrossover.bottom
                             newCrossover.bottom = tmp
@@ -195,5 +168,15 @@ export class CrossoverTile {
 
     onmouseup(e){
         this.cursorDown = false
+    }
+    onkeydown(e){
+        if (e.key === 't'){
+            this.curHeight = 1
+        }
+    }
+    onkeyup(e){
+        if (e.key === 't'){
+            this.curHeight = 0
+        }
     }
 }
