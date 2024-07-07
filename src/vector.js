@@ -176,3 +176,20 @@ export function lineSegmentIntersection(a1, a2, b1, b2){
   }
   return null
 }
+
+export function pointInPolygon(pt, path){
+  // use raycasting algorithm to determineif in polygon, use ray x=1, y=0 for probe
+  // https://en.wikipedia.org/wiki/Point_in_polygon
+  const ray = {x: Number.MAX_SAFE_INTEGER, y: 0}
+  let counter = 0
+  // find t of intersection from ray at pt. If t > 0, increment counter
+  for(let p=0;p<path.length;p++){
+    const int = lineSegmentIntersection(path[p], path[(p+1) % path.length], pt, vadd(pt, ray))
+    if (int !== null){
+      counter++
+    }
+  }
+
+  // if counter is odd - point is inside, even - point is outside
+  return counter % 2 == 1
+}

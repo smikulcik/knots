@@ -16,6 +16,16 @@ export class Scene {
     
       this.cursor = new CircleObject(0, 0, 'red', 5)
 
+      const w = this.canvas.width
+      const h = this.canvas.height
+        this.selectedObject = new CrossoverTile([
+            {x: .25*w, y: .25*h},
+            {x: .75*w, y: .25*h},
+            {x: .75*w, y: .75*h},
+            {x: .25*w, y: .75*h},
+        ])
+        this.objects.push(this.selectedObject)
+
   
       // handle mouse movements
       canvas.onmousemove = (e)=>{
@@ -41,12 +51,7 @@ export class Scene {
       }
       canvas.onmousedown = (e)=>{
 
-        if (this.mode === MODE_DRAWING){
-            // start new object if none selected
-            if (this.selectedObject === undefined){
-                this.selectedObject = new CrossoverTile()
-                this.objects.push(this.selectedObject)
-            }
+        if (this.mode === MODE_DRAWING && this.selectedObject){
             this.selectedObject.onmousedown(e)
         }
         if (this.mode === MODE_EDITING){
