@@ -1,6 +1,6 @@
 import { CircleObject, getCursor } from "./2d.js"
 import { Knot } from "./knot_2d.js"
-import { LinearPath } from "./linear_path.js"
+import { CrossoverTile } from "./crossover_tile.js"
 import { Path } from "./path.js"
 
 const MODE_DRAWING = 1
@@ -44,7 +44,7 @@ export class Scene {
         if (this.mode === MODE_DRAWING){
             // start new object if none selected
             if (this.selectedObject === undefined){
-                this.selectedObject = new LinearPath()
+                this.selectedObject = new CrossoverTile()
                 this.objects.push(this.selectedObject)
             }
             this.selectedObject.onmousedown(e)
