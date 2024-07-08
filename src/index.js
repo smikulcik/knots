@@ -2,6 +2,8 @@ import { Scene } from "./scene.js";
 import { figure8, k3_1, k4_1, trefoil } from "./common_knots.js";
 import "./index.css"
 import { Knot, draw } from "./knot_2d.js";
+import { CrossoverTile } from "./crossover_tile.js";
+import { GridPattern } from "./grid_pattern.js";
 
 function component() {
   const element = document.createElement('canvas')
@@ -19,7 +21,41 @@ window.onload = () => {
   const scene = new Scene(canvas)
 
   // scene.addObject(new Knot(k3_1, 6))
-  scene.addObject(new Knot(k4_1, 20))
+  // scene.addObject(new Knot(k4_1, 20))
+
+  const tile = new CrossoverTile([
+    {x: 0, y: 0},
+    {x: 200, y: 0},
+    {x: 200, y: 200},
+    {x: 0, y: 200},
+  ])
+  // tile.strands = [
+  //   [
+  //     {x: 0, y: 0},
+  //     {x: 50, y: 50},
+  //     {x: 100, y: 100},
+  //   ]
+  // ]
+  // tile.heights = [
+  //   [
+  //     0,
+  //     0,
+  //   ]
+  // ]
+  const gp = new GridPattern(4,4, {
+    'k': tile
+  }, [
+    'k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k',
+  ])
+  gp.offset = {
+    x: 100,
+    y: 100,
+  }
+  scene.addObject(gp)
+  scene.selectedObject = tile
 
   // initial draw
   scene.draw()

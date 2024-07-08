@@ -16,17 +16,6 @@ export class Scene {
     
       this.cursor = new CircleObject(0, 0, 'red', 5)
 
-      const w = this.canvas.width
-      const h = this.canvas.height
-        this.selectedObject = new CrossoverTile([
-            {x: .25*w, y: .25*h},
-            {x: .75*w, y: .25*h},
-            {x: .75*w, y: .75*h},
-            {x: .25*w, y: .75*h},
-        ])
-        this.objects.push(this.selectedObject)
-
-  
       // handle mouse movements
       canvas.onmousemove = (e)=>{
         const c = getCursor(e)
@@ -142,7 +131,7 @@ export class Scene {
         const start = new Date()
         obj.draw(context)
         const end = new Date()
-        if (end - start > 3){
+        if (end - start > 10){
             console.log('draw', obj.constructor.name, end - start)
         }
       }
@@ -153,6 +142,9 @@ export class Scene {
   
     addObject(obj){
       this.objects.push(obj)
+      if (this.selectedObject === undefined){
+        this.selectedObject = obj
+      }
     }
   }
   

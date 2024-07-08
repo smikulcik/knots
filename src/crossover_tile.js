@@ -1,11 +1,13 @@
 import { circle, getCursor, line } from "./2d.js"
-import { closestPointOnPath, distance, lineSegmentIntersection, pointInPolygon, project, veq, vsub } from "./vector.js"
+import { closestPointOnPath, distance, lineSegmentIntersection, pointInPolygon, project, vadd, veq, vsub } from "./vector.js"
 
 
 export class CrossoverTile {
     constructor(edge){
         // array of vertecies that make up the polygon tile
         this.edge = edge
+        this.width = 200
+        this.height = 200
 
         // array of vertex arrays
         this.strands = []
@@ -21,37 +23,60 @@ export class CrossoverTile {
         this.cursor
         this.cursorDown = false
         this.curHeight // 1 for top, 0 for bottom, undefined for alternating
+
+        this.offset = {
+            x: 0,
+            y: 0
+        }
     }
 
     draw(context){
-        const lineWidth = 30
+        const lineWidth = 8
 
         // draw edge
         for(let e=0;e<this.edge.length-1;e++){
-            line(context, this.edge[e], this.edge[e+1], 2, '#000000')
+            line(context, 
+                vadd(this.offset, this.edge[e]), 
+                vadd(this.offset, this.edge[e+1]), 
+                2, '#000000')
         }
-        line(context, this.edge[this.edge.length-1], this.edge[0], 2, '#000000')
+        line(context, 
+            vadd(this.offset, this.edge[this.edge.length-1]), 
+            vadd(this.offset, this.edge[0]), 
+            2, '#000000')
 
         // draw bottom segments
         for(let s=0;s<this.strands.length;s++){
-            for(let v=0;v<this.strands[s].length-2;v++){
+            for(let v=0;v<this.strands[s].length-1;v++){
                 if (this.heights[s]?.[v] === 1) continue
-                line(context, this.strands[s][v], this.strands[s][v+1], lineWidth, '#000000')
+                line(context, 
+                    vadd(this.offset, this.strands[s][v]), 
+                    vadd(this.offset, this.strands[s][v+1]), 
+                    lineWidth, '#000000')
             }
-            for(let v=0;v<this.strands[s].length-2;v++){
+            for(let v=0;v<this.strands[s].length-1;v++){
                 if (this.heights[s]?.[v] === 1) continue
-                line(context, this.strands[s][v], this.strands[s][v+1], lineWidth-3, '#ffffff')
+                line(context, 
+                    vadd(this.offset, this.strands[s][v]), 
+                    vadd(this.offset, this.strands[s][v+1]), 
+                    lineWidth-3, '#ffffff')
             }
         }
         // draw top segments
         for(let s=0;s<this.strands.length;s++){
-            for(let v=0;v<this.strands[s].length-2;v++){
+            for(let v=0;v<this.strands[s].length-1;v++){
                 if (this.heights[s]?.[v-1] !== 1 || this.heights[s]?.[v] !== 1 || this.heights[s]?.[v+1] !== 1) continue
-                line(context, this.strands[s][v], this.strands[s][v+1], lineWidth, '#000000')
+                line(context, 
+                    vadd(this.offset, this.strands[s][v]), 
+                    vadd(this.offset, this.strands[s][v+1]), 
+                    lineWidth, '#000000')
             }
-            for(let v=0;v<this.strands[s].length-2;v++){
+            for(let v=0;v<this.strands[s].length-1;v++){
                 if (this.heights[s]?.[v] !== 1) continue
-                line(context, this.strands[s][v], this.strands[s][v+1], lineWidth-3, '#ffffff')
+                line(context, 
+                    vadd(this.offset, this.strands[s][v]), 
+                    vadd(this.offset, this.strands[s][v+1]), 
+                    lineWidth-3, '#ffffff')
             }
         }
         // compute crossovers
@@ -64,7 +89,8 @@ export class CrossoverTile {
         if (this.cursor){
             const cp = closestPointOnPath(this.edge, this.cursor)
             if (distance(cp, this.cursor) < 20){
-                circle(context, cp, 15, '#0000aa')
+                circle(context, 
+                    vadd(this.offset, cp), 15, '#0000aa')
             }
         }
     }
@@ -80,7 +106,7 @@ export class CrossoverTile {
         }
     }
     onmousemove(e){
-        this.cursor = getCursor(e)
+        this.cursor = vsub(getCursor(e), this.offset)
         if (this.cursorDown){
             // if not inside bounds, return
             if (!pointInPolygon(this.cursor, this.edge)){
