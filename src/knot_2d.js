@@ -1,10 +1,10 @@
-import { CircleObject, drawBezier, circle, getCursor, line } from "./2d.js"
-import { closestPoint, splitQuadBezier, bezier} from "./bezier.js"
-import { rref2x3 } from "./linear.js"
-import { distance, normalize, vadd, vscalar, vsub } from "./vector.js"
+import { CircleObject, drawBezier, circle, getCursor, line } from './2d.js'
+import { closestPoint, splitQuadBezier, bezier } from './bezier.js'
+import { rref2x3 } from './linear.js'
+import { distance, normalize, vadd, vscalar, vsub } from './vector.js'
 
 export class Knot {
-  constructor(knot, lineWidth){
+  constructor(knot, lineWidth) {
     this.knot = knot
     this.lineWidth = lineWidth
 
@@ -15,31 +15,34 @@ export class Knot {
     this.curvePinchPointSelected = false
     this.curvePinchToCursor
   }
-  onmousedown(e){
-    if (this.selectableControlPoint !== undefined){
+
+  onmousedown() {
+    if (this.selectableControlPoint !== undefined) {
       this.controlPointSelected = true
     }
-    if (this.curvePinchPoint){
+    if (this.curvePinchPoint) {
       this.curvePinchPointSelected = true
     }
   }
-  onmouseup(e){
+
+  onmouseup() {
     this.controlPointSelected = false
     this.curvePinchPointSelected = false
   }
-  onmousemove(e){
+
+  onmousemove(e) {
     const cursor = getCursor(e)
 
-    if (!this.curvePinchPointSelected){
+    if (!this.curvePinchPointSelected) {
       // compute closest point
       this.curvePinchPoint = getCurvePinchPoint(this.knot, cursor)
-      if (this.curvePinchPoint){   
+      if (this.curvePinchPoint) {
         this.curvePinchToCursor = vsub(cursor, this.curvePinchPoint.pt)
       }
     }
 
     // move selected things around
-    if (this.curvePinchPointSelected && this.curvePinchPoint){
+    if (this.curvePinchPointSelected && this.curvePinchPoint) {
       // move pinched point to cursor.x by changing c1 and c2
       // for this segment
       const t0 = this.curvePinchPoint.t
@@ -47,19 +50,19 @@ export class Knot {
       this.curvePinchPoint.pt.y = cursor.y - this.curvePinchToCursor.y
       const c = this.curvePinchPoint.segment
       const [c1x, c2x] = rref2x3(
-        3*Math.pow(1-t0, 2)*t0, 3*(1-t0)*t0*t0, this.curvePinchPoint.pt.x - c[0].x*Math.pow(1-t0, 3) - c[3].x*Math.pow(t0, 3),
-        -1*t0/(1-t0), 1, c[2].x - t0*c[1].x/(1-t0)
+        3 * Math.pow(1 - t0, 2) * t0, 3 * (1 - t0) * t0 * t0, this.curvePinchPoint.pt.x - c[0].x * Math.pow(1 - t0, 3) - c[3].x * Math.pow(t0, 3),
+        -1 * t0 / (1 - t0), 1, c[2].x - t0 * c[1].x / (1 - t0),
       )
       const [c1y, c2y] = rref2x3(
-        3*Math.pow(1-t0, 2)*t0, 3*(1-t0)*t0*t0, this.curvePinchPoint.pt.y - c[0].y*Math.pow(1-t0, 3) - c[3].y*Math.pow(t0, 3),
-        -1*t0, 1, c[2].y - t0*c[1].y
+        3 * Math.pow(1 - t0, 2) * t0, 3 * (1 - t0) * t0 * t0, this.curvePinchPoint.pt.y - c[0].y * Math.pow(1 - t0, 3) - c[3].y * Math.pow(t0, 3),
+        -1 * t0, 1, c[2].y - t0 * c[1].y,
       )
       c[1].x = c1x
       c[1].y = c1y
       c[2].x = c2x
       c[2].y = c2y
-      
-      // fix the other side of c1 and c2    
+
+      // fix the other side of c1 and c2
       const center1 = this.knot[this.curvePinchPoint.start.i]
       const other1 = this.knot[this.curvePinchPoint.start.i][this.curvePinchPoint.start.x].c2
       const newOther1 = vadd(center1, vscalar(-1 * distance(other1, center1), normalize(vsub(c[1], center1))))
@@ -71,14 +74,14 @@ export class Knot {
       const newOther2 = vadd(center2, vscalar(-1 * distance(other2, center2), normalize(vsub(c[2], center2))))
       other2.x = newOther2.x
       other2.y = newOther2.y
-
-    } else if (this.controlPointSelected && this.selectableControlPoint){
+    }
+    else if (this.controlPointSelected && this.selectableControlPoint) {
       this.selectableControlPoint.p.x = cursor.x
       this.selectableControlPoint.p.y = cursor.y
 
       // lock other side in rotation
       const center = this.knot[this.selectableControlPoint.i]
-      const other = this.knot[this.selectableControlPoint.i][this.selectableControlPoint.x][this.selectableControlPoint.c === "c1" ? "c2" : "c1"]
+      const other = this.knot[this.selectableControlPoint.i][this.selectableControlPoint.x][this.selectableControlPoint.c === 'c1' ? 'c2' : 'c1']
       const otherDist = distance(other, center)
       const newOther = vadd(center, vscalar(-1 * otherDist, normalize(vsub(this.selectableControlPoint.p, center))))
       other.x = newOther.x
@@ -89,31 +92,32 @@ export class Knot {
     // if mouse is nearby, draw handle
     this.selectableControlPoint = undefined
     const controlPoints = []
-    for(const i in this.knot){
+    for (const i in this.knot) {
       const crossover = this.knot[i]
-      controlPoints.push({p: crossover.a.c1,i,x: 'a', c: 'c1'})
-      controlPoints.push({p: crossover.a.c2,i,x: 'a', c: 'c2'})
-      controlPoints.push({p: crossover.b.c1,i,x: 'b', c: 'c1'})
-      controlPoints.push({p: crossover.b.c2,i,x: 'b', c: 'c2'})
+      controlPoints.push({ p: crossover.a.c1, i, x: 'a', c: 'c1' })
+      controlPoints.push({ p: crossover.a.c2, i, x: 'a', c: 'c2' })
+      controlPoints.push({ p: crossover.b.c1, i, x: 'b', c: 'c1' })
+      controlPoints.push({ p: crossover.b.c2, i, x: 'b', c: 'c2' })
     }
     let shortestDistance
-    controlPoints.forEach(cp=>{
+    controlPoints.forEach((cp) => {
       const distanceToSelected = distance(cp.p, cursor)
-      if (distanceToSelected < 30){
-        if (shortestDistance === undefined || distanceToSelected < shortestDistance){
+      if (distanceToSelected < 30) {
+        if (shortestDistance === undefined || distanceToSelected < shortestDistance) {
           this.selectableControlPoint = cp
-          shortestDistance = distanceToSelected 
+          shortestDistance = distanceToSelected
         }
       }
     })
   }
-  draw(context){
+
+  draw(context) {
     const knot = this.knot
 
     for (const layer of ['bottom', 'top']) {
       let cur = {
         i: 0,
-        x: 'a'
+        x: 'a',
       }
       let lineWidth = this.lineWidth
       let ttl = 8
@@ -128,17 +132,17 @@ export class Knot {
         const c2 = end[nxt.x].c2
 
         // draw curve
-        const [left, right] = splitQuadBezier([start, c1, c2, end], .5)
+        const [left, right] = splitQuadBezier([start, c1, c2, end], 0.5)
         if (// draw left if on layer bottom and it's bottom or layer top and it's top
-          start.top !== cur.x && layer === 'bottom' ||
-          start.top === cur.x && layer === 'top'
+          (start.top !== cur.x && layer === 'bottom')
+          || (start.top === cur.x && layer === 'top')
         ) {
           drawBezier(context, left, lineWidth, '#000000')
           drawBezier(context, left, lineWidth - 3, '#ffffff')
         }
         if (// draw left if on layer bottom and it's bottom or layer top and it's top
-          end.top !== nxt.x && layer === 'bottom' ||
-          end.top === nxt.x && layer === 'top'
+          (end.top !== nxt.x && layer === 'bottom')
+          || (end.top === nxt.x && layer === 'top')
         ) {
           drawBezier(context, right, lineWidth, '#000000')
           drawBezier(context, right, lineWidth - 3, '#ffffff')
@@ -149,7 +153,7 @@ export class Knot {
       } while ((cur.i !== 0 || cur.x !== 'a') && ttl > 0) // continue until we get to the start
     }
     // draw control points
-    for(const crossover of knot){
+    for (const crossover of knot) {
       const a1 = crossover.a.c1
       const a2 = crossover.a.c2
       const b1 = crossover.b.c1
@@ -169,7 +173,7 @@ export class Knot {
       circle(context, b2, 3, '#008800')
     }
 
-    if (this.selectableControlPoint){
+    if (this.selectableControlPoint) {
       (new CircleObject(
         this.selectableControlPoint.p.x,
         this.selectableControlPoint.p.y,
@@ -180,30 +184,30 @@ export class Knot {
     }
 
     // draw closest point
-    if(this.curvePinchPoint){
+    if (this.curvePinchPoint) {
       (new CircleObject(
         this.curvePinchPoint.pt.x,
         this.curvePinchPoint.pt.y,
         this.curvePinchPointSelected ? 'blue' : 'orange',
-        5
+        5,
       )).draw(context)
     }
   }
 }
 
-function getCurvePinchPoint(knot, target){
+function getCurvePinchPoint(knot, target) {
   const closest = closestPointOnKnot(knot, target)
-  if (distance(target, closest.pt) < 30){
+  if (distance(target, closest.pt) < 30) {
     return closest
   }
   return
 }
-function closestPointOnKnot(knot, target){
+function closestPointOnKnot(knot, target) {
   let closestDist
   let closest
   let cur = {
     i: 0,
-    x: 'a'
+    x: 'a',
   }
   do {
     const start = knot[cur.i]
@@ -213,12 +217,12 @@ function closestPointOnKnot(knot, target){
     const c2 = end[nxt.x].c2
 
     const segmentPoints = [
-      start, c1, c2, end
+      start, c1, c2, end,
     ]
     const closestOnSegmentT = closestPoint(target, segmentPoints)
     const closestOnSegment = bezier(segmentPoints, closestOnSegmentT)
     const d = distance(target, closestOnSegment)
-    if (closestDist === undefined || d < closestDist ){
+    if (closestDist === undefined || d < closestDist) {
       closest = {
         pt: closestOnSegment,
         t: closestOnSegmentT,
@@ -237,6 +241,6 @@ function closestPointOnKnot(knot, target){
       closestDist = d
     }
     cur = knot[cur.i][cur.x].n
-  } while ((cur.i !== 0 || cur.x !== 'a')) // continue until we get to the start  
+  } while ((cur.i !== 0 || cur.x !== 'a')) // continue until we get to the start
   return closest
 }

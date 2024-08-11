@@ -1,4 +1,4 @@
-import { distance } from "./vector.js"
+import { distance } from './vector.js'
 
 // bezier utils
 export function splitQuadBezier(p, u) {
@@ -20,7 +20,7 @@ export function splitQuadBezier(p, u) {
       // d[i, j] = d[i-1, j]*u + d[i-1, j+1]*(1-u)
       d[i * n + j] = {
         x: d[(i - 1) * n + j].x * u + d[(i - 1) * n + (j + 1)].x * (1 - u),
-        y: d[(i - 1) * n + j].y * u + d[(i - 1) * n + (j + 1)].y * (1 - u)
+        y: d[(i - 1) * n + j].y * u + d[(i - 1) * n + (j + 1)].y * (1 - u),
       }
     }
   }
@@ -38,15 +38,15 @@ export function splitQuadBezier(p, u) {
   return [right, left]
 }
 
-export function closestPoint(target, points){
+export function closestPoint(target, points) {
   // search across t in [0, 1] to find the closes point
   const subdiv = 100
 
   let minDistT
   let minDist
-  for(let t=0;t<1;t+= 1/subdiv){
+  for (let t = 0; t < 1; t += 1 / subdiv) {
     const distT = distance(target, bezier(points, t))
-    if (minDist === undefined || distT < minDist){
+    if (minDist === undefined || distT < minDist) {
       minDistT = t
       minDist = distT
     }
@@ -54,15 +54,15 @@ export function closestPoint(target, points){
   return minDistT
 }
 
-export function bezier(pts, t){
-  if (pts.length < 4){
-    throw new Error("Need 4 points for bezier curve", pts)
+export function bezier(pts, t) {
+  if (pts.length < 4) {
+    throw new Error('Need 4 points for bezier curve', pts)
   }
-  if (t < 0 || t > 1){
-    throw new Error("t must be in 0, 1", t)
+  if (t < 0 || t > 1) {
+    throw new Error('t must be in 0, 1', t)
   }
   return {
-    x: pts[0].x*Math.pow(1-t, 3) + 3*pts[1].x*Math.pow(1-t, 2)*t + 3*pts[2].x*(1-t)*Math.pow(t, 2) + pts[3].x*Math.pow(t, 3),
-    y: pts[0].y*Math.pow(1-t, 3) + 3*pts[1].y*Math.pow(1-t, 2)*t + 3*pts[2].y*(1-t)*Math.pow(t, 2) + pts[3].y*Math.pow(t, 3),
+    x: pts[0].x * Math.pow(1 - t, 3) + 3 * pts[1].x * Math.pow(1 - t, 2) * t + 3 * pts[2].x * (1 - t) * Math.pow(t, 2) + pts[3].x * Math.pow(t, 3),
+    y: pts[0].y * Math.pow(1 - t, 3) + 3 * pts[1].y * Math.pow(1 - t, 2) * t + 3 * pts[2].y * (1 - t) * Math.pow(t, 2) + pts[3].y * Math.pow(t, 3),
   }
 }

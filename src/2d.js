@@ -1,10 +1,9 @@
-
 // drawing utils
 export function circle(context, c, radius, color) {
-  context.beginPath();
-  context.arc(c.x, c.y, radius, 0, 2 * Math.PI, false);
-  context.fillStyle = color;
-  context.fill();
+  context.beginPath()
+  context.arc(c.x, c.y, radius, 0, 2 * Math.PI, false)
+  context.fillStyle = color
+  context.fill()
   // context.lineWidth = 5;
   // context.strokeStyle = '#003300';
   // context.stroke();
@@ -17,7 +16,7 @@ export function drawBezier(context, points, lineWidth, color) {
 
   context.beginPath()
   context.moveTo(s.x, s.y)
-  context.lineCap = "round"
+  context.lineCap = 'round'
   context.lineWidth = lineWidth
   context.strokeStyle = color
   context.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, e.x, e.y)
@@ -25,15 +24,15 @@ export function drawBezier(context, points, lineWidth, color) {
 }
 
 export function segLine(context, v, lineWidth, color) {
-  if (v.length <= 1)return
+  if (v.length <= 1) return
 
   context.beginPath()
-  context.lineCap = "round"
+  context.lineCap = 'round'
   context.lineWidth = lineWidth
   context.strokeStyle = color
 
   context.moveTo(v[0].x, v[0].y)
-  for(let i=1;i<v.length;i++){
+  for (let i = 1; i < v.length; i++) {
     context.lineTo(v[i].x, v[i].y)
   }
   context.stroke()
@@ -42,31 +41,31 @@ export function segLine(context, v, lineWidth, color) {
 export function getCursor(e) {
   // console.log('e', e)
   let r
-  if (e instanceof TouchEvent){
+  if (e instanceof TouchEvent) {
     return {
       x: e.changedTouches?.[0].pageX,
       y: e.changedTouches?.[0].pageY,
     }
-  } else if (e instanceof MouseEvent){
+  }
+  else if (e instanceof MouseEvent) {
     r = e.toElement.getBoundingClientRect()
     return {
       x: e.clientX - r.left,
-      y: e.clientY - r.top
+      y: e.clientY - r.top,
     }
   }
-  throw new Error("Unknown event type", e)
+  throw new Error('Unknown event type', e)
 }
 
-
 export class CircleObject {
-  constructor(x, y, color, radius){
+  constructor(x, y, color, radius) {
     this.x = x
     this.y = y
     this.color = color
     this.radius = radius
   }
 
-  draw(context){
-    circle(context, {x: this.x, y: this.y}, this.radius, this.color)
+  draw(context) {
+    circle(context, { x: this.x, y: this.y }, this.radius, this.color)
   }
 }
