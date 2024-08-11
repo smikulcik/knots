@@ -6,6 +6,11 @@ import { Path } from "./path.js"
 const MODE_DRAWING = 1
 const MODE_EDITING = 2
 
+const targetFPS = 60
+let drawDelay = 1000/targetFPS
+let fps = 0
+let lastFPS = 0
+
 export class Scene {
     constructor(canvas){
       this.canvas = canvas
@@ -38,12 +43,11 @@ export class Scene {
             // handle objects
             // TODO: Optimize for the objects that apply
             this.objects.forEach(obj=>{
-            if (typeof obj.onmousemove === 'function'){
-                obj.onmousemove(e)
-            }
-        })
+                if (typeof obj.onmousemove === 'function'){
+                    obj.onmousemove(e)
+                }
+            })
         }
-        this.draw()
       }
       canvas.onmousedown = (e)=>{
 
@@ -57,7 +61,6 @@ export class Scene {
                 }
             })
         }
-        this.draw()
       }
       canvas.onmouseup = (e)=>{
         if (this.mode === MODE_DRAWING){
@@ -73,7 +76,6 @@ export class Scene {
             }
             })
         }
-        this.draw()
       }
       window.onkeyup = (e)=>{
         if (this.mode === MODE_DRAWING){
@@ -91,7 +93,6 @@ export class Scene {
             }
             })
         }
-        this.draw()
       }
       window.onkeydown = (e)=>{
         if (this.mode === MODE_DRAWING){
@@ -109,7 +110,6 @@ export class Scene {
             }
             })
         }
-        this.draw()
       }
   
   
@@ -117,6 +117,27 @@ export class Scene {
       canvas.addEventListener("touchstart", canvas.onmousedown)
       canvas.addEventListener("touchend", canvas.onmouseup)
       canvas.addEventListener("touchmove", canvas.onmousemove)
+
+      // start referesh timers
+      const draw = ()=>{
+        this.draw()
+        // setTimeout(draw, drawDelay)
+      }
+      draw()
+      setInterval(draw, drawDelay)
+      setInterval(()=>{
+        lastFPS = fps
+        fps = 0
+
+        // // adjust delay to meet target fps
+        // let e = lastFPS - targetFPS // error in frames per second
+        // // console.log('FPS', lastFPS, e, drawDelay)
+        // if (Math.abs(e) > 1){
+        //     let mspf = 1000/lastFPS - drawDelay // milliseconds to render 1 frame (minus what we delayed for last time)
+        //     drawDelay = Math.max(1000/targetFPS - Math.max(mspf, 0), 0) // if it takes 10ms to render 1 frame, wait 10s less than what we need for target fps
+        //     // console.log('  ', mspf, drawDelay)
+        // }
+      }, 1000)
     }
   
     draw(){
@@ -138,6 +159,10 @@ export class Scene {
   
       // draw cursor over everything
       this.cursor.draw(context)
+
+      // draw FPS
+      context.fillText("FPS: " + lastFPS, 20, 20)
+      fps++
     }
   
     addObject(obj){

@@ -18,6 +18,7 @@ document.body.setAttribute("style", "margin: 0; overflow: hidden")
 window.onload = () => {
   const canvas = document.getElementById("content")
 
+  console.log('onload')
   const scene = new Scene(canvas)
 
   // scene.addObject(new Knot(k3_1, 6))
@@ -25,9 +26,9 @@ window.onload = () => {
 
   const tile = new CrossoverTile([
     {x: 0, y: 0},
-    {x: 200, y: 0},
-    {x: 200, y: 200},
-    {x: 0, y: 200},
+    {x: 100, y: 0},
+    {x: 100, y: 100},
+    {x: 0, y: 100},
   ])
   // tile.strands = [
   //   [
@@ -42,13 +43,13 @@ window.onload = () => {
   //     0,
   //   ]
   // ]
-  const gp = new GridPattern(4,4, {
+  const gp = new GridPattern(8, 4, {
     'k': tile
   }, [
-    'k', 'k', 'k', 'k',
-    'k', 'k', 'k', 'k',
-    'k', 'k', 'k', 'k',
-    'k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k','k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k','k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k','k', 'k', 'k', 'k',
+    'k', 'k', 'k', 'k','k', 'k', 'k', 'k',
   ])
   gp.offset = {
     x: 100,

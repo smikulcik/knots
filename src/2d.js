@@ -24,6 +24,21 @@ export function drawBezier(context, points, lineWidth, color) {
   context.stroke()
 }
 
+export function segLine(context, v, lineWidth, color) {
+  if (v.length <= 1)return
+
+  context.beginPath()
+  context.lineCap = "round"
+  context.lineWidth = lineWidth
+  context.strokeStyle = color
+
+  context.moveTo(v[0].x, v[0].y)
+  for(let i=1;i<v.length;i++){
+    context.lineTo(v[i].x, v[i].y)
+  }
+  context.stroke()
+}
+
 export function getCursor(e) {
   // console.log('e', e)
   let r

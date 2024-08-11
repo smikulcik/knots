@@ -1,4 +1,4 @@
-import { circle, getCursor, line } from "./2d.js"
+import { circle, getCursor, line, segLine } from "./2d.js"
 import { closestPointOnPath, distance, lineSegmentIntersection, pointInPolygon, project, vadd, veq, vsub } from "./vector.js"
 
 
@@ -6,8 +6,8 @@ export class CrossoverTile {
     constructor(edge){
         // array of vertecies that make up the polygon tile
         this.edge = edge
-        this.width = 200
-        this.height = 200
+        this.width = 100
+        this.height = 100
 
         // array of vertex arrays
         this.strands = []
