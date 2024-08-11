@@ -16,6 +16,7 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@stylistic/eslint-plugin": "^2.6.2",
     "chai": "^5.1.0",
     "css-loader": "^7.1.1",
     "eslint": "^9.9.0",
@@ -26,7 +27,9 @@
     "style-loader": "^4.0.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4",
-    "@stylistic/eslint-plugin": "^2.6.2"
+    "webpack-dev-server": "^5.0.4"
+  },
+  "dependencies": {
+    "fit-curve": "^0.2.0"
   }
 }

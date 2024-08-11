@@ -14,6 +14,15 @@ export class GridPattern {
     }
   }
 
+  points() {
+    let numPoints = 0
+    for (const p in this.pattern) {
+      const tile = this.pallet[this.pattern[p]]
+      numPoints += tile.points()
+    }
+    return numPoints
+  }
+
   draw(context) {
     for (const p in this.pattern) {
       const col = p % this.cols

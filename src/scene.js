@@ -146,7 +146,10 @@ export class Scene {
     context.rect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight)
     context.fill()
 
+    let numPoints = 0
     for (const obj of this.objects) {
+      if (obj.points) numPoints += obj.points()
+
       const start = new Date()
       obj.draw(context)
       const end = new Date()
@@ -160,6 +163,7 @@ export class Scene {
 
     // draw FPS
     context.fillText('FPS: ' + lastFPS, 20, 20)
+    context.fillText('Points: ' + numPoints, 20, 50)
     fps++
   }
 

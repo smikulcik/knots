@@ -1,4 +1,5 @@
-import { circle, getCursor, line } from './2d.js'
+import fitCurve from 'fit-curve'
+import { circle, drawBezier, getCursor, line } from './2d.js'
 import { closestPointOnPath, distance, lineSegmentIntersection, pointInPolygon, vadd, veq, vsub } from './vector.js'
 
 export class CrossoverTile {
@@ -10,6 +11,10 @@ export class CrossoverTile {
 
     // array of vertex arrays
     this.strands = []
+
+    // bezier curves
+    this.curves = []
+
     // array of array heightmap info that corresponds with strands
     this.heights = []
     // array of crossovers
@@ -28,6 +33,14 @@ export class CrossoverTile {
     }
   }
 
+  points() {
+    let numPoints = 0
+    this.strands.forEach((s) => {
+      numPoints += s.length
+    })
+    return numPoints
+  }
+
   draw(context) {
     const lineWidth = 8
 
@@ -43,44 +56,82 @@ export class CrossoverTile {
       vadd(this.offset, this.edge[0]),
       2, '#000000')
 
+    // // draw bottom segments
+    // for (let s = 0; s < this.strands.length; s++) {
+    //   for (let v = 0; v < this.strands[s].length - 1; v++) {
+    //     if (this.heights[s]?.[v] === 1) continue
+    //     line(context,
+    //       vadd(this.offset, this.strands[s][v]),
+    //       vadd(this.offset, this.strands[s][v + 1]),
+    //       lineWidth, '#000000')
+    //   }
+    //   for (let v = 0; v < this.strands[s].length - 1; v++) {
+    //     if (this.heights[s]?.[v] === 1) continue
+    //     line(context,
+    //       vadd(this.offset, this.strands[s][v]),
+    //       vadd(this.offset, this.strands[s][v + 1]),
+    //       lineWidth - 3, '#ffffff')
+    //   }
+    // }
+    // // draw top segments
+    // for (let s = 0; s < this.strands.length; s++) {
+    //   for (let v = 0; v < this.strands[s].length - 1; v++) {
+    //     if (this.heights[s]?.[v - 1] !== 1 || this.heights[s]?.[v] !== 1 || this.heights[s]?.[v + 1] !== 1) continue
+    //     line(context,
+    //       vadd(this.offset, this.strands[s][v]),
+    //       vadd(this.offset, this.strands[s][v + 1]),
+    //       lineWidth, '#000000')
+    //   }
+    //   for (let v = 0; v < this.strands[s].length - 1; v++) {
+    //     if (this.heights[s]?.[v] !== 1) continue
+    //     line(context,
+    //       vadd(this.offset, this.strands[s][v]),
+    //       vadd(this.offset, this.strands[s][v + 1]),
+    //       lineWidth - 3, '#ffffff')
+    //   }
+    // }
     // draw bottom segments
-    for (let s = 0; s < this.strands.length; s++) {
-      for (let v = 0; v < this.strands[s].length - 1; v++) {
-        if (this.heights[s]?.[v] === 1) continue
-        line(context,
-          vadd(this.offset, this.strands[s][v]),
-          vadd(this.offset, this.strands[s][v + 1]),
-          lineWidth, '#000000')
+    for (let curve of this.curves) {
+      for (let seg = 0; seg < curve.bezierSegments.length; seg++) {
+        if (curve.heights[seg] !== 0) continue
+        for (let b = 0; b < curve.bezierSegments[seg].length; b++) {
+          const bPts = curve.bezierSegments[seg][b].map(pt => (vadd(this.offset, pt)))
+          drawBezier(context, bPts, lineWidth, '#000000')
+        }
       }
-      for (let v = 0; v < this.strands[s].length - 1; v++) {
-        if (this.heights[s]?.[v] === 1) continue
-        line(context,
-          vadd(this.offset, this.strands[s][v]),
-          vadd(this.offset, this.strands[s][v + 1]),
-          lineWidth - 3, '#ffffff')
+    }
+    for (let curve of this.curves) {
+      for (let seg = 0; seg < curve.bezierSegments.length; seg++) {
+        if (curve.heights[seg] !== 0) continue
+        for (let b = 0; b < curve.bezierSegments[seg].length; b++) {
+          const bPts = curve.bezierSegments[seg][b].map(pt => (vadd(this.offset, pt)))
+          drawBezier(context, bPts, lineWidth - 3, '#ffffff')
+        }
       }
     }
     // draw top segments
-    for (let s = 0; s < this.strands.length; s++) {
-      for (let v = 0; v < this.strands[s].length - 1; v++) {
-        if (this.heights[s]?.[v - 1] !== 1 || this.heights[s]?.[v] !== 1 || this.heights[s]?.[v + 1] !== 1) continue
-        line(context,
-          vadd(this.offset, this.strands[s][v]),
-          vadd(this.offset, this.strands[s][v + 1]),
-          lineWidth, '#000000')
-      }
-      for (let v = 0; v < this.strands[s].length - 1; v++) {
-        if (this.heights[s]?.[v] !== 1) continue
-        line(context,
-          vadd(this.offset, this.strands[s][v]),
-          vadd(this.offset, this.strands[s][v + 1]),
-          lineWidth - 3, '#ffffff')
+    for (let curve of this.curves) {
+      for (let seg = 0; seg < curve.bezierSegments.length; seg++) {
+        if (curve.heights[seg] !== 1) continue
+        for (let b = 0; b < curve.bezierSegments[seg].length; b++) {
+          const bPts = curve.bezierSegments[seg][b].map(pt => (vadd(this.offset, pt)))
+          drawBezier(context, bPts, lineWidth, '#000000')
+        }
       }
     }
-    // compute crossovers
-    // for(let c of this.crossovers){
-    //     let color = '#0000aa'
-    //     circle(context, c, 3, color)
+    for (let curve of this.curves) {
+      for (let seg = 0; seg < curve.bezierSegments.length; seg++) {
+        if (curve.heights[seg] !== 1) continue
+        for (let b = 0; b < curve.bezierSegments[seg].length; b++) {
+          const bPts = curve.bezierSegments[seg][b].map(pt => (vadd(this.offset, pt)))
+          drawBezier(context, bPts, lineWidth - 3, '#ffffff')
+        }
+      }
+    }
+    // // compute crossovers
+    // for (let c of this.crossovers) {
+    //   let color = '#0000aa'
+    //   circle(context, vadd(this.offset, c), 3, color)
     // }
 
     // show closes point
@@ -190,6 +241,40 @@ export class CrossoverTile {
         }
       }
     }
+    // recompute curve and curveHeights from heights
+    // TODO: Optimize so that we don't have to retain all the point data and computation
+    const curves = []
+    for (let s = 0; s < this.strands.length; s++) {
+      let seg = []
+      let curHeight = this.heights[s]?.[0] || 0
+      const curve = {
+        bezierSegments: [],
+        heights: [],
+      }
+      for (let p = 0; p < this.strands[s].length; p++) {
+        const pHeight = this.heights[s]?.[p] || 0
+        seg.push(this.strands[s][p])
+        if (pHeight !== curHeight) {
+          curve.bezierSegments.push(
+            fitCurve(seg.map(pt => [pt.x, pt.y]), 10).map(b => (b.map(p => ({ x: p[0], y: p[1] })))),
+          )
+          curve.heights.push(curHeight)
+          // reset
+          curHeight = pHeight
+          seg = [this.strands[s][p]] // start with this point
+        }
+      }
+      // console.log('seg', seg)
+      // final segment
+      curve.bezierSegments.push(
+        fitCurve(seg.map(pt => [pt.x, pt.y]), 10).map(b => (b.map(p => ({ x: p[0], y: p[1] })))),
+      )
+      curve.heights.push(curHeight)
+
+      curves.push(curve)
+    }
+    this.curves = curves
+    // console.log('curves', curves, this.strands, this.heights)
   }
 
   onmouseup() {
